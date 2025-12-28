@@ -1,45 +1,30 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 import { InferenceClient } from "@huggingface/inference";
 
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
 });
 
-
-/* =========================
-   Hugging Face Client
-========================= */
 const HF_TOKEN = process.env.HF_API_KEY;
-
-if (!HF_TOKEN) {
-  console.error("❌ ERROR: HF_TOKEN not found in .env");
-  process.exit(1);
-}
-
-console.log("✅ HF_TOKEN loaded:", HF_TOKEN.substring(0, 4) + "...");
-
 const client = new InferenceClient(HF_TOKEN);
 
-/* =========================
-   Generate Image Endpoint
-========================= */
 app.post("/generate-image", async (req, res) => {
   try {
     const { inputs } = req.body;
-
-    if (!inputs) {
-      return res.status(400).json({ error: "Prompt is required" });
-    }
-
-    console.log(`🖼️ Generating image for: "${inputs}"`);
+    if (!inputs) return res.status(400).json({ error: "Prompt required" });
 
     const imageBlob = await client.textToImage({
       provider: "nebius",
@@ -50,20 +35,18 @@ app.post("/generate-image", async (req, res) => {
 
     const buffer = Buffer.from(await imageBlob.arrayBuffer());
 
-    res.set("Content-Type", "image/png");
+    res.set({
+      "Content-Type": "image/png",
+      "Cache-Control": "no-store",
+    });
+
     res.send(buffer);
-
-    console.log("✅ Image sent to frontend");
-
   } catch (err) {
-    console.error("❌ Generation Error:", err.message);
     res.status(500).json({ error: err.message });
   }
 });
 
-/* =========================
-   Server Start
-========================= */
-app.listen(3000, () => {
-  console.log("🚀 Server running at http://localhost:3000");
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server running on port ${PORT}`);
 });
