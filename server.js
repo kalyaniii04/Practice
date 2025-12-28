@@ -11,7 +11,15 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: [
+    "https://frabjous-duckanoo-c76d46.netlify.app", // Your live site
+    "http://localhost:5500", // For local testing
+    "http://127.0.0.1:5500"
+  ],
+  methods: ["GET", "POST"],
+  credentials: true
+} ));
 app.use(express.json());
 
 app.get("/", (req, res) => {

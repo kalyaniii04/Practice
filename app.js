@@ -1,7 +1,7 @@
 const form = document.getElementById("prompt_form");
 const imagesContainer = document.getElementById("images_container");
 
-const API_URL = "http://localhost:3000/generate-image";
+const API_URL = "https://practice-rr1h.onrender.com/generate-image";
 
 let isGenerating = false;
 
