@@ -40,9 +40,7 @@ app.post("/generate-image", async (req, res) => {
       provider: "nebius",
       model: "black-forest-labs/FLUX.1-dev",
       inputs,
-      parameters: {
-        num_inference_steps: 20
-      }
+      parameters: { num_inference_steps: 5 }
     });
 
     const buffer = Buffer.from(await imageBlob.arrayBuffer());
